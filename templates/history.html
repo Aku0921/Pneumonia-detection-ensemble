@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History - Pneumonia Detection{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow app-card fade-up">
+            <div class="card-header app-card-header text-white py-3">
+                <h4 class="mb-0">Your Prediction History</h4>
+            </div>
+            <div class="card-body p-4">
+                {% if predictions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Predicted Class</th>
+                                    <th>Confidence</th>
+                                    <th>Ensemble Probability</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pred in predictions %}
+                                    <tr>
+                                        <td>{{ pred.created_at }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if pred.predicted_class == 'PNEUMONIA' else 'success' }}">
+                                                {{ pred.predicted_class }}
+                                            </span>
+                                        </td>
+                                        <td>{{ "%.2f"|format(pred.confidence) }}%</td>
+                                        <td>{{ "%.4f"|format(pred.ensemble_prob) }}</td>
+                                        <td>
+                                            {% if pred.image_filename %}
+                                                                <a href="/static/uploads/{{ pred.image_filename }}" 
+                                                                    class="btn btn-sm btn-outline-primary" target="_blank">
+                                                    View Image
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center py-4">
+                        <h5>No predictions yet</h5>
+                        <p class="mb-0">Start by uploading an X-ray image to see results here.</p>
+                        <a href="/upload" class="btn btn-primary mt-3">Upload Image</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4 text-center">
+            <a href="/upload" class="btn btn-primary btn-lg">
+                Upload New Image
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

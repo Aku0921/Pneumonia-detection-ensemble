@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Model Metrics - Pneumonia Detection{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow app-card fade-up">
+            <div class="card-header app-card-header text-white py-3">
+                <h4 class="mb-0">Model Metrics</h4>
+            </div>
+            <div class="card-body p-4">
+                {% if metrics %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Backbone</th>
+                                    <th>Test Accuracy</th>
+                                    <th>Test AUC</th>
+                                    <th>Test Loss</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in metrics %}
+                                    <tr>
+                                        <td>{{ m.backbone }}</td>
+                                        <td>{{ "%.2f"|format(m.test_accuracy * 100) }}%</td>
+                                        <td>{{ "%.4f"|format(m.test_auc) }}</td>
+                                        <td>{{ "%.4f"|format(m.test_loss) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No metrics found.</div>
+                {% endif %}
+
+                {% if analysis and analysis.best_config %}
+                    <hr>
+                    <h5>Best Configurations</h5>
+                    <ul>
+                        <li><strong>Best Single:</strong> {{ analysis.best_config.single }}</li>
+                        <li><strong>Best Ensemble (Avg):</strong> {{ analysis.best_config.ensemble_avg }}</li>
+                        <li><strong>Best Ensemble (Weighted):</strong> {{ analysis.best_config.ensemble_weighted }}</li>
+                        <li><strong>Best Threshold:</strong> {{ analysis.best_config.threshold }}</li>
+                    </ul>
+                {% endif %}
+
+                <hr>
+                <h5>Charts</h5>
+                <div class="row">
+                    <div class="col-md-6 text-center mb-3">
+                        <img src="/metrics/roc" alt="ROC Curve" class="img-fluid rounded border">
+                        <div class="small text-muted mt-2">ROC Curve</div>
+                    </div>
+                    <div class="col-md-6 text-center mb-3">
+                        <img src="/metrics/confusion" alt="Confusion Matrix" class="img-fluid rounded border">
+                        <div class="small text-muted mt-2">Confusion Matrix</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

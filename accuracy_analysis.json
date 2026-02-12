@@ -1,0 +1,239 @@
+{
+  "single_models": {
+    "densenet121": {
+      "accuracy": 0.8701923076923077,
+      "precision": 0.8471910112359551,
+      "recall": 0.9666666666666667,
+      "f1": 0.9029940119760479,
+      "auc": 0.9574841113302651
+    },
+    "efficientnetb0": {
+      "accuracy": 0.8637820512820513,
+      "precision": 0.9023746701846965,
+      "recall": 0.8769230769230769,
+      "f1": 0.8894668400520156,
+      "auc": 0.9208744247205786
+    },
+    "mobilenetv2": {
+      "accuracy": 0.6330128205128205,
+      "precision": 0.6304700162074555,
+      "recall": 0.9974358974358974,
+      "f1": 0.7725918570009931,
+      "auc": 0.8459675651983345
+    },
+    "resnet50v2": {
+      "accuracy": 0.8461538461538461,
+      "precision": 0.8114406779661016,
+      "recall": 0.982051282051282,
+      "f1": 0.888631090487239,
+      "auc": 0.9454963839579225
+    },
+    "vgg16": {
+      "accuracy": 0.8237179487179487,
+      "precision": 0.7904564315352697,
+      "recall": 0.9769230769230769,
+      "f1": 0.8738532110091743,
+      "auc": 0.9429158448389218
+    }
+  },
+  "ensembles": {
+    "efficientnetb0+resnet50v2": {
+      "accuracy": 0.8782051282051282,
+      "auc": 0.9433486741179049,
+      "recall": 0.9641025641025641,
+      "strategy": "average"
+    },
+    "efficientnetb0+densenet121": {
+      "accuracy": 0.8846153846153846,
+      "auc": 0.947172912557528,
+      "recall": 0.9564102564102565,
+      "strategy": "average"
+    },
+    "efficientnetb0+vgg16": {
+      "accuracy": 0.8557692307692307,
+      "auc": 0.9401051939513477,
+      "recall": 0.9666666666666667,
+      "strategy": "average"
+    },
+    "efficientnetb0+mobilenetv2": {
+      "accuracy": 0.7051282051282052,
+      "auc": 0.9254766600920447,
+      "recall": 0.9948717948717949,
+      "strategy": "average"
+    },
+    "resnet50v2+densenet121": {
+      "accuracy": 0.8685897435897436,
+      "auc": 0.9579114617576157,
+      "recall": 0.9743589743589743,
+      "strategy": "average"
+    },
+    "resnet50v2+vgg16": {
+      "accuracy": 0.8397435897435898,
+      "auc": 0.9514464168310321,
+      "recall": 0.982051282051282,
+      "strategy": "average"
+    },
+    "resnet50v2+mobilenetv2": {
+      "accuracy": 0.6923076923076923,
+      "auc": 0.9510409818102127,
+      "recall": 0.9974358974358974,
+      "strategy": "average"
+    },
+    "densenet121+vgg16": {
+      "accuracy": 0.8509615384615384,
+      "auc": 0.9585689239535393,
+      "recall": 0.9769230769230769,
+      "strategy": "average"
+    },
+    "densenet121+mobilenetv2": {
+      "accuracy": 0.6971153846153846,
+      "auc": 0.9586565855796626,
+      "recall": 0.9974358974358974,
+      "strategy": "average"
+    },
+    "vgg16+mobilenetv2": {
+      "accuracy": 0.6987179487179487,
+      "auc": 0.9541639272408503,
+      "recall": 0.9974358974358974,
+      "strategy": "average"
+    },
+    "efficientnetb0+resnet50v2_weighted": {
+      "accuracy": 0.875,
+      "auc": 0.9435130396668858,
+      "recall": 0.9641025641025641,
+      "strategy": "weighted",
+      "weights": {
+        "efficientnetb0": 0.49340378687802733,
+        "resnet50v2": 0.5065962131219728
+      }
+    },
+    "efficientnetb0+densenet121_weighted": {
+      "accuracy": 0.8878205128205128,
+      "auc": 0.9474358974358975,
+      "recall": 0.9564102564102565,
+      "strategy": "weighted",
+      "weights": {
+        "efficientnetb0": 0.49025487256371814,
+        "densenet121": 0.5097451274362819
+      }
+    },
+    "efficientnetb0+vgg16_weighted": {
+      "accuracy": 0.8557692307692307,
+      "auc": 0.9402805172035941,
+      "recall": 0.9666666666666667,
+      "strategy": "weighted",
+      "weights": {
+        "efficientnetb0": 0.494086936583387,
+        "vgg16": 0.505913063416613
+      }
+    },
+    "efficientnetb0+mobilenetv2_weighted": {
+      "accuracy": 0.7371794871794872,
+      "auc": 0.9251479289940828,
+      "recall": 0.9871794871794872,
+      "strategy": "weighted",
+      "weights": {
+        "efficientnetb0": 0.5211979509060914,
+        "mobilenetv2": 0.4788020490939086
+      }
+    },
+    "resnet50v2+densenet121_weighted": {
+      "accuracy": 0.8669871794871795,
+      "auc": 0.9579443348674118,
+      "recall": 0.9743589743589743,
+      "strategy": "weighted",
+      "weights": {
+        "resnet50v2": 0.49685027581679775,
+        "densenet121": 0.5031497241832021
+      }
+    },
+    "resnet50v2+vgg16_weighted": {
+      "accuracy": 0.8397435897435898,
+      "auc": 0.9514409379793995,
+      "recall": 0.982051282051282,
+      "strategy": "weighted",
+      "weights": {
+        "resnet50v2": 0.500683256303801,
+        "vgg16": 0.499316743696199
+      }
+    },
+    "resnet50v2+mobilenetv2_weighted": {
+      "accuracy": 0.7307692307692307,
+      "auc": 0.9506136313828623,
+      "recall": 0.9948717948717949,
+      "strategy": "weighted",
+      "weights": {
+        "resnet50v2": 0.5277786273082593,
+        "mobilenetv2": 0.47222137269174075
+      }
+    },
+    "densenet121+vgg16_weighted": {
+      "accuracy": 0.8525641025641025,
+      "auc": 0.9585798816568049,
+      "recall": 0.9769230769230769,
+      "strategy": "weighted",
+      "weights": {
+        "densenet121": 0.5038329474919347,
+        "vgg16": 0.4961670525080652
+      }
+    },
+    "densenet121+mobilenetv2_weighted": {
+      "accuracy": 0.7403846153846154,
+      "auc": 0.9586565855796625,
+      "recall": 0.9948717948717949,
+      "strategy": "weighted",
+      "weights": {
+        "densenet121": 0.5309175309722146,
+        "mobilenetv2": 0.4690824690277854
+      }
+    },
+    "vgg16+mobilenetv2_weighted": {
+      "accuracy": 0.7275641025641025,
+      "auc": 0.9540927021696253,
+      "recall": 0.9974358974358974,
+      "strategy": "weighted",
+      "weights": {
+        "vgg16": 0.527097428232779,
+        "mobilenetv2": 0.4729025717672209
+      }
+    }
+  },
+  "thresholds": {
+    "0.3": {
+      "accuracy": 0.8365384615384616,
+      "precision": 0.8050847457627118,
+      "recall": 0.9743589743589743,
+      "f1": 0.8816705336426914
+    },
+    "0.4": {
+      "accuracy": 0.8701923076923077,
+      "precision": 0.8456375838926175,
+      "recall": 0.9692307692307692,
+      "f1": 0.9032258064516129
+    },
+    "0.5": {
+      "accuracy": 0.8846153846153846,
+      "precision": 0.8714953271028038,
+      "recall": 0.9564102564102565,
+      "f1": 0.9119804400977995
+    },
+    "0.6": {
+      "accuracy": 0.8942307692307693,
+      "precision": 0.900990099009901,
+      "recall": 0.9333333333333333,
+      "f1": 0.9168765743073047
+    },
+    "0.7": {
+      "accuracy": 0.9038461538461539,
+      "precision": 0.9435483870967742,
+      "recall": 0.9,
+      "f1": 0.9212598425196851
+    }
+  },
+  "best_config": {
+    "single": "densenet121",
+    "ensemble_avg": "efficientnetb0+densenet121",
+    "ensemble_weighted": "efficientnetb0+densenet121_weighted",
+    "threshold": 0.7
+  }
+}

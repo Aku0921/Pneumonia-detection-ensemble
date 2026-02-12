@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneumonia Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+        
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-area.active {
+            background: #e8ebf9;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .upload-hint {
+            color: #999;
+            font-size: 13px;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-upload {
+            background: #667eea;
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .btn-upload:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-clear {
+            background: #f0f0f0;
+            color: #333;
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .preview {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .preview.show {
+            display: block;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .normal {
+            color: #27ae60;
+        }
+        
+        .pneumonia {
+            color: #e74c3c;
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 13px;
+        }
+        
+        .detail {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .detail-label {
+            color: #999;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .info {
+            background: #f0f4ff;
+            color: #333;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-top: 15px;
+            border-left: 3px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🫁 Pneumonia Detection</h1>
+        <p class="subtitle">AI-powered chest X-ray analysis</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Click or drag to upload X-ray image</div>
+            <div class="upload-hint">PNG, JPG, JPEG (max 5 MB)</div>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-upload" id="btnUpload" disabled>Upload & Predict</button>
+            <button class="btn-clear" id="btnClear" disabled>Clear</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing image...</p>
+        </div>
+        
+        <div class="preview" id="preview">
+            <img id="previewImage" class="preview-image" alt="Preview">
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <div class="result-label">Prediction</div>
+            <div class="result-value" id="resultLabel"></div>
+            <div class="result-details">
+                <div class="detail">
+                    <div class="detail-label">Pneumonia Probability</div>
+                    <div class="detail-value" id="resultProb"></div>
+                </div>
+                <div class="detail">
+                    <div class="detail-label">Confidence</div>
+                    <div class="detail-value" id="resultConf"></div>
+                </div>
+                <div class="detail">
+                    <div class="detail-label">Inference Time</div>
+                    <div class="detail-value" id="resultTime"></div>
+                </div>
+                <div class="detail">
+                    <div class="detail-label">Model Version</div>
+                    <div class="detail-value" id="resultModel"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info">
+            ℹ️ This model predicts pneumonia from chest X-ray images with ~72% AUC. Always consult a radiologist for clinical decisions.
+        </div>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const btnUpload = document.getElementById('btnUpload');
+        const btnClear = document.getElementById('btnClear');
+        const preview = document.getElementById('preview');
+        const previewImage = document.getElementById('previewImage');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+        let selectedFile = null;
+        
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('active');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('active');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFileSelect(files[0]);
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
+        });
+        
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select an image file');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showError('File size must be less than 5 MB');
+                return;
+            }
+            
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                preview.classList.add('show');
+                btnUpload.disabled = false;
+                btnClear.disabled = false;
+                clearError();
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        btnUpload.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            loading.classList.add('show');
+            btnUpload.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Prediction failed');
+                }
+                
+                const data = await response.json();
+                displayResult(data);
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                loading.classList.remove('show');
+                btnUpload.disabled = false;
+            }
+        });
+        
+        btnClear.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            preview.classList.remove('show');
+            result.classList.remove('show');
+            btnUpload.disabled = true;
+            btnClear.disabled = true;
+            clearError();
+        });
+        
+        function displayResult(data) {
+            const label = data.prediction === 'pneumonia' ? 'PNEUMONIA' : 'NORMAL';
+            const className = data.prediction === 'pneumonia' ? 'pneumonia' : 'normal';
+            
+            document.getElementById('resultLabel').textContent = label;
+            document.getElementById('resultLabel').className = `result-value ${className}`;
+            document.getElementById('resultProb').textContent = (data.pneumonia_probability * 100).toFixed(1) + '%';
+            document.getElementById('resultConf').textContent = (data.confidence * 100).toFixed(1) + '%';
+            document.getElementById('resultTime').textContent = data.inference_time_ms.toFixed(0) + ' ms';
+            document.getElementById('resultModel').textContent = 'v' + data.model_version;
+            
+            result.classList.add('show');
+        }
+        
+        function showError(msg) {
+            errorDiv.textContent = msg;
+            errorDiv.classList.add('show');
+        }
+        
+        function clearError() {
+            errorDiv.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

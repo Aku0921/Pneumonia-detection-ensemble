@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Upload X-Ray - Pneumonia Detection{% endblock %}
+
+{% block content %}
+<!-- NO CACHE META TAGS -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<div class="row upload-page">
+    <div class="col-lg-9 col-xl-8 mx-auto">
+        <div class="card shadow app-card fade-up">
+            <div class="card-header app-card-header text-white py-3">
+                <h4 class="mb-0">Upload Chest X-Ray Image</h4>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-4">
+                    Upload a chest X-ray image to detect pneumonia. The image will be analyzed using our AI ensemble model.
+                </p>
+
+                <!-- AJAX FORM (not traditional POST) -->
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select X-Ray Image</label>
+                        <div class="upload-area border-2 border-dashed rounded p-4 text-center" id="uploadArea">
+                            <svg class="mb-3" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2z"/>
+                            </svg>
+                            <p class="mb-2">Drag and drop your image here</p>
+                            <p class="text-muted small mb-3">or</p>
+                            <input type="file" id="fileInput" name="file" accept=".png,.jpg,.jpeg,.gif" class="d-none" required>
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                Browse Files
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">Supported: PNG, JPG, JPEG, GIF (Max 16MB)</small>
+                    </div>
+
+                    <div id="preview" class="mb-4" style="display: none;">
+                        <p class="fw-bold mb-2">Preview:</p>
+                        <img id="previewImage" src="" alt="Preview" class="img-fluid rounded" style="max-width: 300px;">
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100" id="submitBtn" disabled>
+                        Analyze Image
+                    </button>
+                </form>
+
+                <div id="loadingSpinner" style="display: none; text-align: center; margin-top: 20px;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <p class="mt-2">Analyzing image...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <h5 class="alert-heading">ℹ️ Instructions</h5>
+            <ul class="mb-0">
+                <li>Upload a clear chest X-ray image</li>
+                <li>Image should be in PNG, JPG, JPEG, or GIF format</li>
+                <li>Image size should not exceed 16MB</li>
+                <li>Results will be displayed immediately after analysis</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const preview = document.getElementById('preview');
+    const previewImage = document.getElementById('previewImage');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    // Force reset form on every page load/visit
+    function resetForm() {
+        console.log('=== FORM RESET START ===');
+        
+        // Clear everything
+        uploadForm.reset();
+        console.log('Form.reset() called');
+        
+        // Explicitly clear file input
+        fileInput.value = '';
+        try {
+            const dt = new DataTransfer();
+            fileInput.files = dt.files;
+        } catch (err) {
+            console.warn('Could not reset fileInput.files:', err);
+        }
+        console.log(`FileInput.value after reset: "${fileInput.value}"`);
+        console.log(`FileInput.files.length after reset: ${fileInput.files.length}`);
+        
+        // Hide preview
+        preview.style.display = 'none';
+        previewImage.src = '';
+        previewImage.removeAttribute('src');
+        
+        // Reset buttons
+        submitBtn.disabled = true;
+        loadingSpinner.style.display = 'none';
+        
+        console.log('=== FORM RESET COMPLETE ===');
+    }
+
+    // Reset on page load
+    window.addEventListener('load', function() {
+        console.log('[PAGE LOAD] Resetting form');
+        resetForm();
+    });
+    
+    // Also reset when returning from result page (browser back button)
+    window.addEventListener('pageshow', function(event) {
+        console.log('[PAGE SHOW] Persistence:', event.persisted ? 'FROM CACHE' : 'FRESH LOAD');
+        resetForm();
+    });
+    
+    // Reset before unload (ensure clean state)
+    window.addEventListener('beforeunload', function() {
+        console.log('[BEFORE UNLOAD] Clearing form');
+        resetForm();
+    });
+
+    // File input change handler
+    fileInput.addEventListener('change', function(e) {
+        console.log('[FILE INPUT CHANGE] Files selected:');
+        if (this.files.length > 0) {
+            for (let i = 0; i < this.files.length; i++) {
+                console.log(`  [${i}] ${this.files[i].name} (${this.files[i].size} bytes)`);
+            }
+        } else {
+            console.log('  NO FILES');
+        }
+        handleFileSelect();
+    });
+
+    // Drag and drop handlers
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('bg-light');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('bg-light');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('bg-light');
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect();
+    });
+
+    function handleFileSelect() {
+        console.log('[HANDLE FILE SELECT] Called');
+        const file = fileInput.files[0];
+        console.log(`  Files in fileInput: ${fileInput.files.length}`);
+        
+        if (file) {
+            console.log(`  File selected: ${file.name}`);
+            console.log(`    Size: ${file.size} bytes`);
+            console.log(`    Type: ${file.type}`);
+            console.log(`    Last modified: ${file.lastModified}`);
+            console.log(`    Last modified date: ${new Date(file.lastModified)}`);
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                console.log(`  FileReader onload triggered`);
+                previewImage.src = e.target.result;
+                preview.style.display = 'block';
+                submitBtn.disabled = false;
+            };
+            reader.onerror = (e) => {
+                console.error(`  FileReader error:`, e);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            console.log('  NO FILE SELECTED');
+        }
+    }
+
+    // AJAX Form submission (NOT traditional form POST)
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();  // Prevent traditional form submission
+        
+        console.log('[FORM SUBMIT] Triggered');
+        
+        const file = fileInput.files[0];
+        console.log(`[FORM SUBMIT] Files in fileInput.files: ${fileInput.files.length}`);
+        
+        if (!file) {
+            console.error('[FORM SUBMIT] NO FILE SELECTED!');
+            alert('Please select a file');
+            return;
+        }
+
+        const timestamp = Date.now();
+        const fileHash = `${file.name}|${file.size}|${file.lastModified}`;
+        console.log(`[FORM SUBMIT] File details for upload:`);
+        console.log(`  Name: ${file.name}`);
+        console.log(`  Size: ${file.size} bytes`);
+        console.log(`  Type: ${file.type}`);
+        console.log(`  Last Modified: ${file.lastModified} (${new Date(file.lastModified)})`);
+        console.log(`  File Hash: ${fileHash}`);
+        console.log(`  Timestamp: ${timestamp}`);
+        
+        loadingSpinner.style.display = 'block';
+        submitBtn.disabled = true;
+        
+        // Create FormData for multipart/form-data
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // Debug: Log FormData contents
+        console.log('[FORM SUBMIT] FormData contents before fetch:');
+        for (let [key, value] of formData.entries()) {
+            if (value instanceof File) {
+                console.log(`  ${key}: File(${value.name}, ${value.size} bytes, hash: ${value.name}|${value.size}|${value.lastModified})`);
+            } else {
+                console.log(`  ${key}: ${value}`);
+            }
+        }
+        
+        try {
+            const uploadUrl = `/upload?t=${timestamp}`;
+            console.log(`[FETCH] URL: ${uploadUrl}`);
+            console.log(`[FETCH] Method: POST`);
+            console.log(`[FETCH] Headers: Accept=application/json`);
+            
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            console.log(`[FETCH] Response status: ${response.status} ${response.statusText}`);
+            
+            const responseText = await response.text();
+            console.log(`[FETCH] Response length: ${responseText.length} characters`);
+            console.log(`[FETCH] Response preview: ${responseText.substring(0, 300)}`);
+            
+            if (!response.ok) {
+                console.error('[FETCH ERROR] Status not ok:', responseText);
+                alert('Upload failed with status ' + response.status);
+                loadingSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+                resetForm();
+                return;
+            }
+            
+            // Parse JSON response with redirect URL
+            let data;
+            try {
+                data = JSON.parse(responseText);
+                console.log('[JSON PARSE] Success:', data);
+            } catch (parseError) {
+                console.error('[JSON PARSE] Failed:', parseError);
+                console.error('[JSON PARSE] Raw response:', responseText);
+                alert('Server returned invalid JSON');
+                loadingSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+                resetForm();
+                return;
+            }
+            
+            if (data.redirect) {
+                const redirectUrl = data.redirect + '&t=' + timestamp;
+                console.log(`[REDIRECT] Target URL: ${redirectUrl}`);
+                console.log(`[REDIRECT] Navigating...`);
+                
+                // Use a small delay to ensure the page actually navigates
+                setTimeout(() => {
+                    console.log(`[REDIRECT] Setting window.location.href`);
+                    window.location.href = redirectUrl;
+                }, 100);
+            } else {
+                console.error('[RESPONSE] No redirect URL in data:', data);
+                alert('Unexpected response from server');
+                loadingSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+                resetForm();
+            }
+            
+        } catch (error) {
+            console.error('[FETCH EXCEPTION]', error);
+            console.error('[FETCH EXCEPTION] Stack:', error.stack);
+            alert('Upload failed: ' + error.message);
+            loadingSpinner.style.display = 'none';
+            submitBtn.disabled = false;
+            resetForm();
+        }
+    });
+</script>
+{% endblock %}

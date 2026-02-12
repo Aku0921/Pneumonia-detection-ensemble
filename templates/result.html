@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Result - Pneumonia Detection{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-lg border-0 app-card fade-up">
+            <div class="card-header app-card-header text-white py-4 text-center">
+                <h2 class="mb-0">{{ result.message }}</h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="text-center">
+                            <h5>Prediction Result</h5>
+                            <div class="prediction-box p-4 bg-light rounded">
+                                <h2 class="mb-2">{{ result.class }}</h2>
+                                <p class="text-muted">Classification</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="result-stats">
+                            <div class="stat-box mb-3 p-3 bg-light rounded">
+                                <p class="text-muted mb-1">Confidence Score</p>
+                                <h4 class="mb-0">{{ result.confidence }}%</h4>
+                            </div>
+                            <div class="stat-box mb-3 p-3 bg-light rounded">
+                                <p class="text-muted mb-1">Pneumonia Probability</p>
+                                <h4 class="mb-0">{{ result.ensemble_prob_str }}</h4>
+                                <div class="small text-muted">Raw: {{ "%.4f"|format(result.ensemble_prob / 100) }}</div>
+                                <div class="small text-muted">Threshold: {{ "%.2f"|format(result.threshold) }}</div>
+                            </div>
+                            <div class="stat-box mb-3 p-3 bg-light rounded">
+                                <p class="text-muted mb-1">Inference Time</p>
+                                <h4 class="mb-0">{{ inference_time }}ms</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="model-details mb-4">
+                    <h5 class="mb-3">📊 Model Predictions (Ensemble Vote)</h5>
+                    
+                    <div class="probability-container p-3 bg-light rounded mb-3">
+                        <p class="text-muted mb-2"><strong>EfficientNetB0</strong></p>
+                        <div class="probability-bar" style="height: 30px; background-color: #e9ecef; border-radius: 15px; overflow: hidden;">
+                            <div class="fill" style="width: {{ result.efficientnetb0_prob * 100 }}%; height: 100%; background: linear-gradient(90deg, #0056b3, #0073e6); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                {{ "%.2f"|format(result.efficientnetb0_prob * 100) }}%
+                            </div>
+                            <div class="small text-muted mt-1">Raw: {{ "%.4f"|format(result.efficientnetb0_prob) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="probability-container p-3 bg-light rounded mb-3">
+                        <p class="text-muted mb-2"><strong>DenseNet121</strong></p>
+                        <div class="probability-bar" style="height: 30px; background-color: #e9ecef; border-radius: 15px; overflow: hidden;">
+                            <div class="fill" style="width: {{ result.densenet121_prob * 100 }}%; height: 100%; background: linear-gradient(90deg, #28a745, #5cc76f); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                {{ "%.2f"|format(result.densenet121_prob * 100) }}%
+                            </div>
+                            <div class="small text-muted mt-1">Raw: {{ "%.4f"|format(result.densenet121_prob) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="probability-container p-3 rounded mb-3" style="background: linear-gradient(135deg, #0f766e 0%, #f59e0b 100%); color: white;">
+                        <p class="text-white mb-2"><strong>⭐ Ensemble Average</strong></p>
+                        <div class="probability-bar" style="height: 35px; background-color: rgba(255,255,255,0.3); border-radius: 15px; overflow: hidden;">
+                            <div class="fill" style="width: {{ result.ensemble_prob }}%; height: 100%; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; color: #0f172a; font-weight: bold; font-size: 14px;">
+                                {{ result.ensemble_prob_str }}
+                            </div>
+                        </div>
+                        <p class="mt-2 mb-0">
+                            {% if result.class == 'PNEUMONIA' %}
+                                <span class="badge bg-danger">PNEUMONIA DETECTED</span>
+                            {% else %}
+                                <span class="badge bg-success">NORMAL - NO PNEUMONIA</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="alert alert-{{ 'danger' if result.class == 'PNEUMONIA' else 'success' }} alert-dismissible fade show">
+                    <h5 class="alert-heading">⚠️ Important Notice</h5>
+                    <p class="mb-0">This tool is for educational and screening purposes only. <strong>Always consult a qualified medical professional for diagnosis and treatment.</strong> Do not rely solely on this AI prediction for clinical decisions.</p>
+                </div>
+
+                <div class="alert alert-secondary">
+                    <h6 class="mb-2">Input Details</h6>
+                    <div class="small">
+                        <div><strong>Result ID:</strong> {{ result.result_id }}</div>
+                        <div><strong>Filename:</strong> {{ result.filename }}</div>
+                        <div><strong>File Size:</strong> {{ result.file_size }} bytes</div>
+                        <div><strong>File Hash:</strong> {{ result.file_hash }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="/upload" class="btn btn-primary btn-lg w-100" onclick="return clearCache()">
+                        Analyze Another Image
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function clearCache() {
+    // Add timestamp to force fresh page load
+    const timestamp = new Date().getTime();
+    window.location.href = '/upload?t=' + timestamp;
+    return false;
+}
+</script>
+
+<style>
+    .stat-box {
+        border-left: 4px solid var(--primary-color);
+    }
+    .result-stats h4 {
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+    .prediction-box h2 {
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+    .probability-bar {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
